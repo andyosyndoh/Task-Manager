@@ -8,14 +8,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
-	"task/backend/routes"
 	"task/backend/database"
-	"task/backend/handlers"
 	"task/backend/models"
+	routes "task/backend/config"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
