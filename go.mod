@@ -2,8 +2,6 @@ module task
 
 go 1.23
 
-toolchain go1.24.7
-
 require (
 	github.com/gofiber/fiber/v2 v2.52.9
 	github.com/joho/godotenv v1.5.1
