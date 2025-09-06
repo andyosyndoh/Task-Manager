@@ -8,7 +8,7 @@ import (
 
 func Setup(app *fiber.App) {
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hey Champ, the Task API is now live!")
+		return c.SendString("Hey Champ, the Task API is now live!\nThanks to Andy\n")
 	})
 
 	// Public wallet routes
