@@ -11,6 +11,7 @@ import (
 
 func main() {
 	database.ConnectDB()
+	database.RunMigrations()
 	app := fiber.New()
 
 	// Add CORS middleware
