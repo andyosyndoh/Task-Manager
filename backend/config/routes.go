@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"task/backend/handlers"
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -10,5 +12,5 @@ func Setup(app *fiber.App) {
 	})
 
 	// Public wallet routes
-	// app.Post("/create", handlers.CreateWallet)
+	app.Post("/create", handlers.CreateTask)
 }
