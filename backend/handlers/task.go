@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 func CreateTask(c *fiber.Ctx) error {
@@ -20,6 +21,11 @@ func CreateTask(c *fiber.Ctx) error {
 			return date.After(time.Now())
 		}
 		return false
+	})
+
+	// Custom validation for no spaces
+	validate.RegisterValidation("nospaces", func(fl validator.FieldLevel) bool {
+		return !strings.Contains(fl.Field().String(), " ")
 	})
 
 	taskRequest := new(models.CreateTaskRequest)
@@ -55,4 +61,30 @@ func CreateTask(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(task)
+}
+
+func GetTask(c *fiber.Ctx) error {
+	taskTitle := c.Params("title")
+	if taskTitle == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Task title cannot be empty"})
+	}
+
+	var task models.Task
+	if result := database.DB.Where("title = ?", taskTitle).First(&task); result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Task not found"})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not retrieve task"})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(task)
+}
+
+func GetAllTasks(c *fiber.Ctx) error {
+	var tasks []models.Task
+	if result := database.DB.Find(&tasks); result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not retrieve tasks"})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(tasks)
 }

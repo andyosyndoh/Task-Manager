@@ -25,7 +25,7 @@ type Task struct {
 }
 
 type CreateTaskRequest struct {
-	Title       string       `json:"title" validate:"required,min=1,max=200"`
+	Title       string       `json:"title" validate:"required,min=1,max=200,nospaces"`
 	Description string       `json:"description"`
 	Status      TaskStatus   `json:"status"`
 	DueDate     *time.Time   `json:"due_date" validate:"required,future"`
