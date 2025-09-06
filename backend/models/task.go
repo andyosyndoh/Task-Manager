@@ -15,19 +15,20 @@ const (
 
 
 type Task struct {
-	ID          int          `json:"id" db:"id"`
-	Title       string       `json:"title" db:"title"`
-	Description string       `json:"description" db:"description"`
-	Status      TaskStatus   `json:"status" db:"status"`	
-	CreatedAt   time.Time    `json:"created_at" db:"created_at"`
-	UpdatedAt   time.Time    `json:"updated_at" db:"updated_at"`
+	ID          int          `json:"id" gorm:"primaryKey"`
+	Title       string       `json:"title" gorm:"unique;not null"`
+	Description string       `json:"description"`
+	Status      TaskStatus   `json:"status" gorm:"default:'pending'"`
+	DueDate     *time.Time   `json:"due_date"`
+	CreatedAt   time.Time    `json:"created_at"`
+	UpdatedAt   time.Time    `json:"updated_at"`
 }
 
 type CreateTaskRequest struct {
 	Title       string       `json:"title" validate:"required,min=1,max=200"`
 	Description string       `json:"description"`
 	Status      TaskStatus   `json:"status"`
-	DueDate     *time.Time   `json:"due_date"`
+	DueDate     *time.Time   `json:"due_date" validate:"required,future"`
 }
 
 type UpdateTaskRequest struct {
