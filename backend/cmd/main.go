@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/gin-contrib/cors"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2"
 )
 
