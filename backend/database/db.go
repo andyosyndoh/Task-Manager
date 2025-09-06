@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/lib/pq" // PostgreSQL driver for checking specific errors
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -14,14 +16,18 @@ import (
 var DB *gorm.DB
 
 func ConnectDB() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	// --- Step 1: Connect to the default 'postgres' database to check if our DB exists ---
 	const (
-		host     = "localhost"
-		port     = 5432
-		user     = "postgres"
-		password = "aaosindo"
-		dbname   = "task_manager"
+		host   = "localhost"
+		port   = 5432
+		dbname = "task_manager"
 	)
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
 
 	// DSN for the initial connection to the 'postgres' database
 	initialDSN := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=postgres sslmode=disable", host, port, user, password)
