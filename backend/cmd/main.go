@@ -3,18 +3,21 @@ package main
 import (
 	"fmt"
 	"log"
+	"task/backend/database"
 
-	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 func main() {
+	database.ConnectDB()
+	database.RunMigrations()
 	app := fiber.New()
 
 	// Add CORS middleware
 	app.Use(cors.New(cors.Config{
-		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
-		AllowHeaders:     "Origin,Content-Type,Accept,Authorization",
+		AllowMethods: "GET,POST,PUT,DELETE,OPTIONS",
+		AllowHeaders: "Origin,Content-Type,Accept,Authorization",
 		// AllowCredentials: true,
 	}))
 
