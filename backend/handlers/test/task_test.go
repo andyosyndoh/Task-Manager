@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -11,9 +12,9 @@ import (
 	"testing"
 	"time"
 
+	routes "task/backend/config"
 	"task/backend/database"
 	"task/backend/models"
-	routes "task/backend/config"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
@@ -27,7 +28,7 @@ var testDB *gorm.DB
 
 func TestMain(m *testing.M) {
 	// Load .env file
-	err := godotenv.Load("../../.env")
+	err := godotenv.Load("../../../.env")
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
@@ -52,13 +53,13 @@ func TestMain(m *testing.M) {
 }
 
 func connectTestDB() *gorm.DB {
-	host := os.Getenv("TEST_DB_HOST")
-	port := os.Getenv("TEST_DB_PORT")
-	user := os.Getenv("TEST_DB_USER")
-	password := os.Getenv("TEST_DB_PASSWORD")
-	dbname := os.Getenv("TEST_DB_NAME")
+	host := "localhost"
+	port := 5432
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := "task_manager"
 
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -147,7 +148,13 @@ func TestCreateTask(t *testing.T) {
 	resp, err = makeRequest("POST", "/tasks", taskWithSpaces)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
-	assert.Contains(t, resp.Body.String(), "nospaces")
+	// Read the response body
+	bodyBytes, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err)  // Make sure there was no error reading the body
+	defer resp.Body.Close() // IMPORTANT: Always close the body
+
+	// Now you can assert against the body content as a string
+	assert.Contains(t, string(bodyBytes), "nospaces")
 }
 
 func TestGetTask(t *testing.T) {
@@ -275,7 +282,7 @@ func TestUpdateTask(t *testing.T) {
 		Status:      models.TaskStatusPending,
 		DueDate:     func() *time.Time { t := time.Now().Add(24 * time.Hour); return &t }(),
 	}
-	resp, err = makeRequest("POST", "/tasks", taskRequest)
+	resp, err := makeRequest("POST", "/tasks", taskRequest)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
@@ -319,7 +326,13 @@ func TestUpdateTask(t *testing.T) {
 	resp, err = makeRequest("PUT", "/tasks/TaskToUpdate", updateInvalidDueDateRequest)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
-	assert.Contains(t, resp.Body.String(), "future")
+	// Read the response body
+	bodyBytes, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err)  // Make sure there was no error reading the body
+	defer resp.Body.Close() // IMPORTANT: Always close the body
+
+	// Now you can assert against the body content as a string
+	assert.Contains(t, string(bodyBytes), "nospaces")
 }
 
 func TestDeleteTask(t *testing.T) {
@@ -330,7 +343,7 @@ func TestDeleteTask(t *testing.T) {
 		Status:      models.TaskStatusPending,
 		DueDate:     func() *time.Time { t := time.Now().Add(24 * time.Hour); return &t }(),
 	}
-	resp, err = makeRequest("POST", "/tasks", taskRequest)
+	resp, err := makeRequest("POST", "/tasks", taskRequest)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
