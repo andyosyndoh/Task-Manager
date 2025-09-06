@@ -88,3 +88,76 @@ func GetAllTasks(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(tasks)
 }
+
+func UpdateTask(c *fiber.Ctx) error {
+	validate := validator.New()
+
+	// Custom validation for future date
+	validate.RegisterValidation("future", func(fl validator.FieldLevel) bool {
+		if date, ok := fl.Field().Interface().(time.Time); ok {
+			return date.After(time.Now())
+		}
+		return false
+	})
+
+	// Custom validation for no spaces
+	validate.RegisterValidation("nospaces", func(fl validator.FieldLevel) bool {
+		return !strings.Contains(fl.Field().String(), " ")
+	})
+
+	taskTitle := c.Params("title")
+	if taskTitle == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Task title cannot be empty"})
+	}
+
+	var existingTask models.Task
+	if result := database.DB.Where("title = ?", taskTitle).First(&existingTask); result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Task not found"})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not retrieve task"})
+	}
+
+	updateRequest := new(models.UpdateTaskRequest)
+	if err := c.BodyParser(updateRequest); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid body"})
+	}
+
+	// Validate the update request
+	if err := validate.Struct(updateRequest); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	// Apply updates
+	if updateRequest.Title != nil {
+		// Check for unique title if title is being updated
+		if *updateRequest.Title != existingTask.Title {
+			var count int64
+			database.DB.Model(&models.Task{}).Where("title = ?", *updateRequest.Title).Count(&count)
+			if count > 0 {
+				return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Task with this new title already exists"})
+			}
+		}
+		existingTask.Title = *updateRequest.Title
+	}
+
+	if updateRequest.Description != nil {
+		existingTask.Description = *updateRequest.Description
+	}
+
+	if updateRequest.Status != nil {
+		existingTask.Status = *updateRequest.Status
+	}
+
+	if updateRequest.DueDate != nil {
+		existingTask.DueDate = updateRequest.DueDate
+	}
+
+	existingTask.UpdatedAt = time.Now()
+
+	if result := database.DB.Save(&existingTask); result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not update task"})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(existingTask)
+}

@@ -15,4 +15,5 @@ func Setup(app *fiber.App) {
 	app.Post("/tasks", handlers.CreateTask)
 	app.Get("/tasks", handlers.GetAllTasks)
 	app.Get("/tasks/:title", handlers.GetTask)
+	app.Put("/tasks/:title", handlers.UpdateTask)
 }
