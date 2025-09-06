@@ -15,7 +15,7 @@ func main() {
 	app.Use(cors.New(cors.Config{
 		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
 		AllowHeaders:     "Origin,Content-Type,Accept,Authorization",
-		AllowCredentials: true,
+		// AllowCredentials: true,
 	}))
 
 	fmt.Println("🚀 Server starting on localhost:3000")
