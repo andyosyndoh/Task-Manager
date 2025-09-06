@@ -60,6 +60,7 @@ func CreateTask(c *fiber.Ctx) error {
 
 func GetTask(c *fiber.Ctx) error {
 	taskTitle := c.Params("title")
+	fmt.Println("Received task title:", taskTitle) // Add this line for debugging
 	if taskTitle == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Task title cannot be empty"})
 	}
