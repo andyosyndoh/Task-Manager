@@ -1,4 +1,4 @@
-curl -X POST http://localhost:3000/create  -H "Content-Type:
+curl -X POST http://localhost:3000/tasks  -H "Content-Type:
  application/json"     -d '{
         "title": "My New Task",
         "description": "This is a description for my new task.",
@@ -10,3 +10,6 @@ curl -X POST http://localhost:3000/create  -H "Content-Type:
 
  curl -X GET "http://localhost:3000/tasks/Task"
 {"id":2,"title":"Task","description":"This is a description for my new task.","status":"pending","due_date":"2026-01-01T02:59:59+03:00","created_at":"2025-09-06T11:50:19.204726+03:00","updated_at":"2025-09-06T11:50:19.204726+03:00"}
+
+curl -X GET "http://localhost:3000/tasks"
+[{"id":1,"title":"My New Task","description":"This is a description for my new task.","status":"pending","due_date":"2026-01-01T02:59:59+03:00","created_at":"2025-09-06T11:22:15.716537+03:00","updated_at":"2025-09-06T11:22:15.716537+03:00"},{"id":2,"title":"Task","description":"This is a description for my new task.","status":"pending","due_date":"2026-01-01T02:59:59+03:00","created_at":"2025-09-06T11:50:19.204726+03:00","updated_at":"2025-09-06T11:50:19.204726+03:00"}]
