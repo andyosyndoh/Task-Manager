@@ -68,12 +68,5 @@ func ConnectDB() {
 		log.Fatal("failed to connect to task_manager database:", err)
 	}
 
-	// The AutoMigrate function should be called in your main function or a setup function,
-	// after you've defined your models. For example:
-	// err = DB.AutoMigrate(&models.User{}, &models.Task{})
-	// if err != nil {
-	// 	log.Fatal("failed to migrate database:", err)
-	// }
-
 	fmt.Println("Connected to the database successfully.")
 }
