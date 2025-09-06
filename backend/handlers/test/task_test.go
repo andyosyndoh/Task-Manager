@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"task/backend/config"
+	"task/backend/routes"
 	"task/backend/database"
 	"task/backend/handlers"
 	"task/backend/models"
@@ -43,7 +43,7 @@ func TestMain(m *testing.M) {
 
 	// Setup Fiber app
 	app = fiber.New()
-	config.SetupRoutes(app) // Use the SetupRoutes from your config package
+	routes.Setup(app) // Use the SetupRoutes from your config package
 
 	// Run tests
 	code := m.Run()
@@ -87,7 +87,7 @@ func clearTestDB(db *gorm.DB) {
 }
 
 // Helper function to make HTTP requests
-func makeRequest(method, url string, body interface{}) (*httptest.ResponseRecorder, error) {
+func makeRequest(method, url string, body interface{}) (*http.Response, error) {
 	var req *http.Request
 	var err error
 
@@ -159,7 +159,7 @@ func TestGetTask(t *testing.T) {
 		Description: "Description for TaskToGet",
 		DueDate:     func() *time.Time { t := time.Now().Add(24 * time.Hour); return &t }(),
 	}
-	resp, err := makeRequest("POST", "/tasks", taskRequest)
+	resp, err = makeRequest("POST", "/tasks", taskRequest)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
@@ -197,7 +197,7 @@ func TestGetAllTasks(t *testing.T) {
 	}
 
 	// Test case 1: Get all tasks (no filters, no pagination)
-	resp, err := makeRequest("GET", "/tasks", nil)
+	resp, err = makeRequest("GET", "/tasks", nil)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	var tasksResponse models.TasksResponse
@@ -277,7 +277,7 @@ func TestUpdateTask(t *testing.T) {
 		Status:      models.TaskStatusPending,
 		DueDate:     func() *time.Time { t := time.Now().Add(24 * time.Hour); return &t }(),
 	}
-	resp, err := makeRequest("POST", "/tasks", taskRequest)
+	resp, err = makeRequest("POST", "/tasks", taskRequest)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
@@ -329,9 +329,10 @@ func TestDeleteTask(t *testing.T) {
 	taskRequest := models.CreateTaskRequest{
 		Title:       "TaskToDelete",
 		Description: "Description for TaskToDelete",
+		Status:      models.TaskStatusPending,
 		DueDate:     func() *time.Time { t := time.Now().Add(24 * time.Hour); return &t }(),
 	}
-	resp, err := makeRequest("POST", "/tasks", taskRequest)
+	resp, err = makeRequest("POST", "/tasks", taskRequest)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
