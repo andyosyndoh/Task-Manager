@@ -11,6 +11,9 @@ func Setup(app *fiber.App) {
 		return c.SendString("Hey Champ, the Task API is now live!")
 	})
 
-	// Public wallet routes
 	app.Post("/create", handlers.CreateTask)
+	// app.Get("/tasks", handlers.GetTasks)
+	app.Get("/tasks/:title", handlers.GetTask)
+	// app.Put("/tasks/:title", handlers.UpdateTask)
+	// app.Delete("/tasks/:title", handlers.DeleteTask)
 }
