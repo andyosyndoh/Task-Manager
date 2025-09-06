@@ -157,7 +157,7 @@ func TestGetTask(t *testing.T) {
 		Description: "Description for TaskToGet",
 		DueDate:     func() *time.Time { t := time.Now().Add(24 * time.Hour); return &t }(),
 	}
-	resp, err = makeRequest("POST", "/tasks", taskRequest)
+	resp, err := makeRequest("POST", "/tasks", taskRequest)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
@@ -195,7 +195,7 @@ func TestGetAllTasks(t *testing.T) {
 	}
 
 	// Test case 1: Get all tasks (no filters, no pagination)
-	resp, err = makeRequest("GET", "/tasks", nil)
+	resp, err := makeRequest("GET", "/tasks", nil)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	var tasksResponse models.TasksResponse
