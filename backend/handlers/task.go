@@ -23,6 +23,11 @@ func CreateTask(c *fiber.Ctx) error {
 		return false
 	})
 
+	// Custom validation for no spaces
+	validate.RegisterValidation("nospaces", func(fl validator.FieldLevel) bool {
+		return !strings.Contains(fl.Field().String(), " ")
+	})
+
 	taskRequest := new(models.CreateTaskRequest)
 	if err := c.BodyParser(taskRequest); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid body"})
@@ -60,7 +65,6 @@ func CreateTask(c *fiber.Ctx) error {
 
 func GetTask(c *fiber.Ctx) error {
 	taskTitle := c.Params("title")
-	fmt.Println("Received task title:", taskTitle) // Add this line for debugging
 	if taskTitle == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Task title cannot be empty"})
 	}
