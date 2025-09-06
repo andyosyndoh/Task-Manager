@@ -9,7 +9,6 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	"gorm.io/gorm"
 )
 
 func CreateTask(c *fiber.Ctx) error {
@@ -57,4 +56,3 @@ func CreateTask(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(task)
 }
-
