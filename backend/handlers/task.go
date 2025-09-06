@@ -82,11 +82,56 @@ func GetTask(c *fiber.Ctx) error {
 
 func GetAllTasks(c *fiber.Ctx) error {
 	var tasks []models.Task
-	if result := database.DB.Find(&tasks); result.Error != nil {
+	var total int64
+
+	// Get query parameters
+	status := c.Query("status")
+	dueDateStr := c.Query("due_date")
+	page := c.QueryInt("page", 1)
+	size := c.QueryInt("size", 10)
+	search := c.Query("search")
+
+	// Build base query
+	query := database.DB.Model(&models.Task{})
+
+	// Apply filters
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	if dueDateStr != "" {
+		// Parse due_date string to time.Time
+		dueDate, err := time.Parse("2006-01-02", dueDateStr)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid due_date format. Use YYYY-MM-DD"})
+		}
+		// Filter tasks due on or before the specified date
+		query = query.Where("due_date <= ?", dueDate)
+	}
+
+	// Apply search by title
+	if search != "" {
+		query = query.Where("title ILIKE ?", "%"+search+"%")
+	}
+
+	// Count total records
+	query.Count(&total)
+
+	// Apply pagination
+	offset := (page - 1) * size
+	query = query.Offset(offset).Limit(size)
+
+	// Execute query
+	if result := query.Find(&tasks); result.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not retrieve tasks"})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(tasks)
+	return c.Status(fiber.StatusOK).JSON(models.TasksResponse{
+		Tasks: tasks,
+		Total: total,
+		Page:  page,
+		Size:  size,
+	})
 }
 
 func UpdateTask(c *fiber.Ctx) error {
