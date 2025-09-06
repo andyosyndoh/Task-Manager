@@ -1,5 +1,24 @@
 package main
 
-func main() {
+import (
+	"fmt"
+	"log"
 
+	"github.com/gin-contrib/cors"
+	"github.com/gofiber/fiber/v2"
+)
+
+func main() {
+	app := fiber.New()
+
+	// Add CORS middleware
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "http://localhost:5173",
+		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
+		AllowHeaders:     "Origin,Content-Type,Accept,Authorization",
+		AllowCredentials: true,
+	}))
+
+	fmt.Println("🚀 Server starting on localhost:3000")
+	log.Fatal(app.Listen("localhost:3000"))
 }
