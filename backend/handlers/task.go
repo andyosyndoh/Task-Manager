@@ -79,3 +79,12 @@ func GetTask(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(task)
 }
+
+func GetAllTasks(c *fiber.Ctx) error {
+	var tasks []models.Task
+	if result := database.DB.Find(&tasks); result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not retrieve tasks"})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(tasks)
+}
