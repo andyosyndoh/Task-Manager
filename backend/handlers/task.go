@@ -161,3 +161,24 @@ func UpdateTask(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(existingTask)
 }
+
+func DeleteTask(c *fiber.Ctx) error {
+	taskTitle := c.Params("title")
+	if taskTitle == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Task title cannot be empty"})
+	}
+
+	var task models.Task
+	if result := database.DB.Where("title = ?", taskTitle).First(&task); result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Task not found"})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not retrieve task"})
+	}
+
+	if result := database.DB.Delete(&task); result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not delete task"})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Task deleted successfully"})
+}
