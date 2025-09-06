@@ -40,7 +40,7 @@ type UpdateTaskRequest struct {
 
 type TasksResponse struct {
 	Tasks []Task `json:"tasks"`
-	Total int    `json:"total"`
+	Total int64  `json:"total"`
 	Page  int    `json:"page"`
 	Size  int    `json:"size"`
 }
