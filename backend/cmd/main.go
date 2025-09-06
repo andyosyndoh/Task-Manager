@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	routes "task/backend/config"
 	"task/backend/database"
 
 	"github.com/gofiber/fiber/v2"
@@ -20,6 +21,8 @@ func main() {
 		AllowHeaders: "Origin,Content-Type,Accept,Authorization",
 		// AllowCredentials: true,
 	}))
+
+	routes.Setup(app)
 
 	fmt.Println("🚀 Server starting on localhost:3000")
 	log.Fatal(app.Listen("localhost:3000"))
