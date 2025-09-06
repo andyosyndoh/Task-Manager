@@ -16,4 +16,5 @@ func Setup(app *fiber.App) {
 	app.Get("/tasks", handlers.GetAllTasks)
 	app.Get("/tasks/:title", handlers.GetTask)
 	app.Put("/tasks/:title", handlers.UpdateTask)
+	app.Delete("/tasks/:title", handlers.DeleteTask)
 }
