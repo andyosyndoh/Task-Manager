@@ -45,6 +45,8 @@ The project follows a standard Go application layout:
 │   │   ├── db.go
 │   │   └── migrate.go
 │   ├── handlers/task.go    # HTTP request handlers (controllers)
+|   |   ├── test/task_test.go
+|   |   └── task.go
 │   └── models/task.go      # GORM data models
 ├── go.mod                  # Go module dependencies
 ├── Makefile                # Commands for building and running
