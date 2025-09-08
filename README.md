@@ -198,6 +198,40 @@ curl -X GET http://localhost:3000/tasks
 ]
 ```
 
+### Bonus Features:
+
+**Filtering by Status:**
+
+* **Endpoint**: `GET /tasks?status=pending`
+
+```bash
+curl -X GET http://localhost:3000/tasks?status=pending
+```
+
+**Filtering by Due Date:**
+
+* **Endpoint**: `GET /tasks?due_date=2025-12-31`
+
+```bash
+curl -X GET "http://localhost:3000/tasks?due_date=2025-12-31"
+```
+
+**Pagination:**
+
+* **Endpoint**: `GET /tasks?page=1&size=1`
+
+```bash
+curl -X GET "http://localhost:3000/tasks?page=1&size=1"
+```
+
+**Search by Title:**
+
+* **Endpoint**: `GET /tasks?search=Cook`
+
+```bash
+curl -X GET "http://localhost:3000/tasks?search=Cook"
+```
+
 ### Get a Single Task by Title
 
   * **Endpoint**: `GET /tasks/:title`
