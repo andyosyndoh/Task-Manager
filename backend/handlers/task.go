@@ -54,7 +54,8 @@ func CreateTask(c *fiber.Ctx) error {
 	}
 
 	if result := database.DB.Create(&task); result.Error != nil {
-		if strings.Contains(result.Error.Error(), "duplicate key value violates unique constraint \"tasks_title_key\"") {
+		if strings.Contains(result.Error.Error(), "duplicate key value violates unique constraint") ||
+		   strings.Contains(result.Error.Error(), "UNIQUE constraint failed") {
 			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Task with this title already exists"})
 		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not create task"})
@@ -84,11 +85,22 @@ func GetAllTasks(c *fiber.Ctx) error {
 	var tasks []models.Task
 	var total int64
 
-	// Get query parameters
+	// Get query parameters with proper validation
 	status := c.Query("status")
 	dueDateStr := c.Query("due_date")
+	
+	// Handle pagination parameters with proper validation
 	page := c.QueryInt("page", 1)
 	size := c.QueryInt("size", 10)
+	
+	// Ensure positive values for pagination
+	if page <= 0 {
+		page = 1
+	}
+	if size <= 0 {
+		size = 10
+	}
+	
 	search := c.Query("search")
 
 	// Build base query
@@ -155,6 +167,16 @@ func UpdateTask(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Task title cannot be empty"})
 	}
 
+	updateRequest := new(models.UpdateTaskRequest)
+	if err := c.BodyParser(updateRequest); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid body"})
+	}
+
+	// Validate the update request BEFORE checking if task exists
+	if err := validate.Struct(updateRequest); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
 	var existingTask models.Task
 	if result := database.DB.Where("title = ?", taskTitle).First(&existingTask); result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
@@ -163,19 +185,8 @@ func UpdateTask(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not retrieve task"})
 	}
 
-	updateRequest := new(models.UpdateTaskRequest)
-	if err := c.BodyParser(updateRequest); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid body"})
-	}
-
-	// Validate the update request
-	if err := validate.Struct(updateRequest); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
-	}
-
-	// Apply updates
+	// Rest of the update logic remains the same...
 	if updateRequest.Title != nil {
-		// Check for unique title if title is being updated
 		if *updateRequest.Title != existingTask.Title {
 			var count int64
 			database.DB.Model(&models.Task{}).Where("title = ?", *updateRequest.Title).Count(&count)
